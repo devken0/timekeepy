@@ -18,7 +18,7 @@ This is a simple timekeeping tool that I use at work. It uses python libraries l
 
 ### Scheduled reminder
 
-A LaunchAgent can prompt you Mon–Fri at the end of your shift with *"Have you already timed out for today?"* and a **Time out now** button that launches `run.command`.
+A LaunchAgent can prompt you Mon–Fri at the end of your shift with *"Have you already timed out for today?"* and three buttons: **Ignore**, **Remind in 10 min**, and **Time out now** (which launches `run.command`). The 10-minute snooze is short on purpose — overtime is unpaid, so a single snooze keeps you well under typical timesheet rounding.
 
 The reminder time is derived from `WORK_START_HOUR` in `.env`: it fires at `WORK_START_HOUR + 9` (8h shift + 1h lunch). With the default `WORK_START_HOUR=10` the prompt appears at 19:00. Change `WORK_START_HOUR` in `.env` and the next day's reminder moves automatically — no reinstall needed (the LaunchAgent fires hourly within a wide evening window and the wrapper re-reads `.env` each time).
 
