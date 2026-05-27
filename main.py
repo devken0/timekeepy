@@ -1,172 +1,200 @@
-import subprocess
-import time as delay 
-import os
 import glob
+import logging
+import os
+import shutil
+import subprocess
+import sys
+import time as delay
+from datetime import datetime, time
+from dotenv import load_dotenv
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support.wait import WebDriverWait
-from selenium.webdriver.support.ui import Select
 from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import TimeoutException
-from dotenv import load_dotenv
-from datetime import datetime, time
+from selenium.webdriver.support.ui import Select
+from selenium.webdriver.support.wait import WebDriverWait
 
-# load environment variables
 load_dotenv()
 
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
+log = logging.getLogger("timekeepy")
+
+REQUIRED_ENV_VARS = [
+    "WEBCAM_APP",
+    "SELFIE_DIR",
+    "LOGIN_URL",
+    "FIRST_NAME",
+    "LAST_NAME",
+    "PIN",
+    "SCREENSHOTS_DIR",
+]
+
+
+def load_config():
+    missing = [name for name in REQUIRED_ENV_VARS if not os.getenv(name)]
+    if missing:
+        log.error("Missing required env vars: %s", ", ".join(missing))
+        sys.exit(1)
+    return {
+        "webcam_app": os.getenv("WEBCAM_APP"),
+        "selfie_dir": os.getenv("SELFIE_DIR"),
+        "login_url": os.getenv("LOGIN_URL"),
+        "first_name": os.getenv("FIRST_NAME"),
+        "last_name": os.getenv("LAST_NAME"),
+        "pin": os.getenv("PIN"),
+        "screenshots_dir": os.getenv("SCREENSHOTS_DIR"),
+        "work_start_hour": int(os.getenv("WORK_START_HOUR", "10")),
+        "max_screenshots": int(os.getenv("MAX_SCREENSHOTS", "60")),
+        "selenium_timeout_seconds": int(os.getenv("SELENIUM_TIMEOUT_SECONDS", "9999")),
+    }
+
+
 def limit_files_in_directory(directory_path, max_files_limit):
-  # get list of all files in the directory
-  files = glob.glob(os.path.join(directory_path, '*'))
-  files = [f for f in files if os.path.isfile(f)]
+    files = glob.glob(os.path.join(directory_path, "*"))
+    files = [f for f in files if os.path.isfile(f)]
+    files.sort(key=os.path.getmtime)
 
-  # sort files by modification time
-  files.sort(key=os.path.getmtime)
+    num_files = len(files)
+    if num_files <= max_files_limit:
+        log.info(
+            "File count (%d) is within limit (%d). No cleanup needed.",
+            num_files,
+            max_files_limit,
+        )
+        return
 
-  # check if number of files exceed the limit
-  num_files = len(files)
-  if num_files > max_files_limit:
-    files_to_remove_count = num_files - max_files_limit
-    files_to_remove = files[:files_to_remove_count]
-
-    print(f"Current file count ({num_files}) exceeds limit ({max_files_limit}).")
-    print(f"Removing {files_to_remove_count} oldest files.")
-
-    # remove the oldest files
+    files_to_remove = files[: num_files - max_files_limit]
+    log.info(
+        "File count (%d) exceeds limit (%d). Removing %d oldest.",
+        num_files,
+        max_files_limit,
+        len(files_to_remove),
+    )
     for file_path in files_to_remove:
-      try:
-        os.remove(file_path)
-        print(f"Removed: {file_path}")
-      except OSError as e:
-        print(f"Error removing {file_path}: {e}")
-  else:
-    print(f"Current file count ({num_files}) is within the limit of ({max_files_limit}) files. No action needed.")
-    
+        try:
+            os.remove(file_path)
+            log.info("Removed: %s", file_path)
+        except OSError as e:
+            log.error("Error removing %s: %s", file_path, e)
+
+
 def find_most_recent_jpg(folder_path):
-  # Create a pattern to match .jpg and .jpeg files (case-insensitive)
-  # The pattern should include the full path
-  search_pattern = os.path.join(folder_path, '*.[jJ][pP][gG]')
+    patterns = [
+        os.path.join(folder_path, "*.[jJ][pP][gG]"),
+        os.path.join(folder_path, "*.[jJ][pP][eE][gG]"),
+    ]
+    files = []
+    for p in patterns:
+        files.extend(glob.glob(p))
+    files = [f for f in files if os.path.isfile(f)]
 
-  # returns a list of paths
-  list_of_files = glob.glob(search_pattern)
+    if not files:
+        return None
 
-  # Ensure the list only contains actual files (not directories, although glob usually handles this)
-  files = [f for f in list_of_files if os.path.isfile(f)]
+    return max(files, key=os.path.getmtime)
 
-  if not files:
-    return None # No .jpg or .jpeg files found
-
-  # find the most recent image
-  latest_file = max(files, key=os.path.getmtime)
-
-  return latest_file
 
 def activate_safari():
-  try:
-    subprocess.run(
-      ["osascript", "-e", 'tell application "Safari" to activate'],
-      check=True,
-      timeout=5,
-    )
-  except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
-    print(f"Warning: could not activate Safari before screenshot: {e}")
+    # bring Safari to the foreground so macOS resumes rendering before screenshot capture
+    try:
+        subprocess.run(
+            ["osascript", "-e", 'tell application "Safari" to activate'],
+            check=True,
+            timeout=5,
+        )
+    except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
+        log.warning("Could not activate Safari before screenshot: %s", e)
 
-try:
-  # open app
-  app_name = os.getenv("WEBCAM_APP") 
-  process = subprocess.run(["open", "-a", app_name, '-W'])
-except FileNotFoundError:
-   print("The application was not found.")
-except Exception as e:
-   print(f"An error occured: {e}")
 
-print("Application closed. Continuing Python script execution.")
+def main():
+    config = load_config()
 
-# scan directory for new selfie image
-directory_to_scan = os.getenv("SELFIE_DIR") 
-most_recent_file = find_most_recent_jpg(directory_to_scan)
+    try:
+        subprocess.run(["open", "-a", config["webcam_app"], "-W"])
+    except FileNotFoundError:
+        log.error("The 'open' command or webcam app was not found.")
+        sys.exit(1)
+    except Exception as e:
+        log.error("Error opening the webcam app: %s", e)
+        sys.exit(1)
 
-# mv the new selfie image
-source = most_recent_file
-timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-temp = f'/tmp/{timestamp}.jpg' # rename the file to have the current date and time
-destination = temp 
+    log.info("Application closed. Continuing script execution.")
 
-try: 
-  subprocess.run(["mv", source, destination], check=True)
-  print(f"Executed mv command: mv {source} {destination}")
-except subprocess.CalledProcessError as e:
-  print(f"Error executing mv command: {e}")
-except FileNotFoundError:
-  print("Error: 'mv' command not found.")
+    most_recent_file = find_most_recent_jpg(config["selfie_dir"])
+    if most_recent_file is None:
+        log.error("No selfie image found in %s", config["selfie_dir"])
+        sys.exit(1)
 
-# initialize safari webdriver
-driver = webdriver.Safari()
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    temp = f"/tmp/{timestamp}.jpg"
 
-# employee login/timekeeping url
+    try:
+        shutil.move(most_recent_file, temp)
+        log.info("Moved selfie: %s -> %s", most_recent_file, temp)
+    except OSError as e:
+        log.error("Error moving selfie file: %s", e)
+        sys.exit(1)
 
-driver.get(os.getenv("LOGIN_URL"))
+    driver = webdriver.Safari()
+    try:
+        driver.get(config["login_url"])
 
-first_name = driver.find_element(By.ID, "firstName")
-first_name.clear()
-first_name.send_keys(os.getenv("FIRST_NAME"))
+        first_name = driver.find_element(By.ID, "firstName")
+        first_name.clear()
+        first_name.send_keys(config["first_name"])
 
-last_name = driver.find_element(By.ID, "lastName")
-last_name.clear()
-last_name.send_keys(os.getenv("LAST_NAME"))
+        last_name = driver.find_element(By.ID, "lastName")
+        last_name.clear()
+        last_name.send_keys(config["last_name"])
 
-pin = driver.find_element(By.ID, "pin")
-pin.clear()
-pin.send_keys(os.getenv("PIN"))
+        pin = driver.find_element(By.ID, "pin")
+        pin.clear()
+        pin.send_keys(config["pin"])
 
-login_button = driver.find_element(By.CSS_SELECTOR, ".btn-login")
-login_button.click()
+        login_button = driver.find_element(By.CSS_SELECTOR, ".btn-login")
+        login_button.click()
 
-timeout = 9999 
+        wait = WebDriverWait(driver, config["selenium_timeout_seconds"])
 
-wait = WebDriverWait(driver, timeout) 
+        dropdown_element = wait.until(EC.element_to_be_clickable((By.ID, "timeType")))
+        select = Select(dropdown_element)
 
-dropdown_element = wait.until(EC.element_to_be_clickable((By.ID, "timeType")))
-select = Select(dropdown_element)
+        current_time = datetime.now().time()
+        work_start = time(config["work_start_hour"], 0, 0)
+        if current_time <= work_start:
+            select.select_by_visible_text("Time In")
+        else:
+            select.select_by_visible_text("Time Out")
 
-# get current time of day
-current_time = datetime.now().time()
+        file_upload = driver.find_element(By.ID, "selfieFile")
+        file_upload.send_keys(temp)
 
-# define specific time (start of work) - 10 AM
-work_start = time(10, 0, 0) 
+        submit = wait.until(EC.element_to_be_clickable((By.ID, "submitButton")))
+        submit.click()
 
-if current_time <= work_start:
-  select.select_by_visible_text("Time In")
-else: 
-  select.select_by_visible_text("Time Out")
-  
-fileUpload = driver.find_element(By.ID, "selfieFile")
-fileUpload.send_keys(temp)
+        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".btn-back")))
 
-submit = wait.until(EC.element_to_be_clickable((By.ID, "submitButton")))
-submit.click()
+        activate_safari()
+        delay.sleep(2)
 
-wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".btn-back")))
+        screenshot_path = os.path.join(config["screenshots_dir"], f"{timestamp}.png")
+        driver.save_screenshot(screenshot_path)
+        log.info("Saved screenshot: %s", screenshot_path)
 
-# bring Safari to the foreground so macOS resumes rendering before capture
-activate_safari()
-delay.sleep(2)
+        delay.sleep(10)
+    finally:
+        driver.quit()
 
-screenshots_dir = f"{os.getenv('SCREENSHOTS_DIR')}"
+    try:
+        os.remove(temp)
+        log.info("Removed selfie temp file: %s", temp)
+    except OSError as e:
+        log.error("Error removing temp file %s: %s", temp, e)
 
-# save screenshot
-driver.save_screenshot(f"{screenshots_dir}/{timestamp}.png")
+    limit_files_in_directory(config["screenshots_dir"], config["max_screenshots"])
 
-delay.sleep(10)
 
-driver.quit()
-
-# cleanup
-# delete selfie
-command = ['rm', temp]
-subprocess.run(command)
-print(f"Executed rm command: rm {temp}")
-
-# limit screenshots to 60
-directory_to_manage = f'{screenshots_dir}' 
-max_allowed_files = 60
-limit_files_in_directory(directory_to_manage, max_allowed_files)
+if __name__ == "__main__":
+    main()
