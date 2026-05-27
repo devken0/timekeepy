@@ -16,3 +16,35 @@ This is a simple timekeeping tool that I use at work. It uses python libraries l
 - `MAX_SCREENSHOTS` (default `60`) — cap on screenshots kept in `SCREENSHOTS_DIR`.
 - `SELENIUM_TIMEOUT_SECONDS` (default `9999`) — how long Selenium waits for elements (kept high because you take the selfie manually between steps).
 
+### Scheduled reminder
+
+A LaunchAgent can prompt you Mon–Fri at the end of your shift with *"Have you already timed out for today?"* and a **Time out now** button that launches `run.command`.
+
+The reminder time is derived from `WORK_START_HOUR` in `.env`: it fires at `WORK_START_HOUR + 9` (8h shift + 1h lunch). With the default `WORK_START_HOUR=10` the prompt appears at 19:00. Change `WORK_START_HOUR` in `.env` and the next day's reminder moves automatically — no reinstall needed (the LaunchAgent fires hourly within a wide evening window and the wrapper re-reads `.env` each time).
+
+Install:
+
+```sh
+./install-schedule.sh
+```
+
+Smoke-test the dialog without waiting (bypasses the hour check):
+
+```sh
+./notify-timeout.sh force
+```
+
+Disable temporarily (e.g. PTO):
+
+```sh
+launchctl bootout gui/$UID ~/Library/LaunchAgents/com.ken.timekeepy.timeout-notify.plist
+```
+
+Re-enable:
+
+```sh
+launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ken.timekeepy.timeout-notify.plist
+```
+
+Logs: `/tmp/timekeepy-timeout-notify.log`.
+
