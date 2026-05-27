@@ -60,8 +60,18 @@ def find_most_recent_jpg(folder_path):
 
   return latest_file
 
+def activate_safari():
+  try:
+    subprocess.run(
+      ["osascript", "-e", 'tell application "Safari" to activate'],
+      check=True,
+      timeout=5,
+    )
+  except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
+    print(f"Warning: could not activate Safari before screenshot: {e}")
+
 try:
-  # open app 
+  # open app
   app_name = os.getenv("WEBCAM_APP") 
   process = subprocess.run(["open", "-a", app_name, '-W'])
 except FileNotFoundError:
@@ -137,7 +147,9 @@ submit.click()
 
 wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".btn-back")))
 
-delay.sleep(5)
+# bring Safari to the foreground so macOS resumes rendering before capture
+activate_safari()
+delay.sleep(2)
 
 screenshots_dir = f"{os.getenv('SCREENSHOTS_DIR')}"
 
