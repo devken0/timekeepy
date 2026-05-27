@@ -3,10 +3,10 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>com.ken.timekeepy.timeout-notify</string>
+    <string>com.ken.timekeepy.timein-notify</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/Users/ken/Code/timekeepy/notify-timeout.sh</string>
+        <string>/Users/ken/Code/timekeepy/notify-timein.sh</string>
     </array>
     <key>StartCalendarInterval</key>
     <array>
@@ -14,328 +14,368 @@
             <key>Weekday</key>
             <integer>1</integer>
             <key>Hour</key>
-            <integer>15</integer>
+            <integer>5</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>1</integer>
             <key>Hour</key>
-            <integer>16</integer>
+            <integer>6</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>1</integer>
             <key>Hour</key>
-            <integer>17</integer>
+            <integer>7</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>1</integer>
             <key>Hour</key>
-            <integer>18</integer>
+            <integer>8</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>1</integer>
             <key>Hour</key>
-            <integer>19</integer>
+            <integer>9</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>1</integer>
             <key>Hour</key>
-            <integer>20</integer>
+            <integer>10</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>1</integer>
             <key>Hour</key>
-            <integer>21</integer>
+            <integer>11</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>1</integer>
             <key>Hour</key>
-            <integer>22</integer>
+            <integer>12</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key>
+            <integer>1</integer>
+            <key>Hour</key>
+            <integer>13</integer>
+            <key>Minute</key>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>2</integer>
             <key>Hour</key>
-            <integer>15</integer>
+            <integer>5</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>2</integer>
             <key>Hour</key>
-            <integer>16</integer>
+            <integer>6</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>2</integer>
             <key>Hour</key>
-            <integer>17</integer>
+            <integer>7</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>2</integer>
             <key>Hour</key>
-            <integer>18</integer>
+            <integer>8</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>2</integer>
             <key>Hour</key>
-            <integer>19</integer>
+            <integer>9</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>2</integer>
             <key>Hour</key>
-            <integer>20</integer>
+            <integer>10</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>2</integer>
             <key>Hour</key>
-            <integer>21</integer>
+            <integer>11</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>2</integer>
             <key>Hour</key>
-            <integer>22</integer>
+            <integer>12</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key>
+            <integer>2</integer>
+            <key>Hour</key>
+            <integer>13</integer>
+            <key>Minute</key>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>3</integer>
             <key>Hour</key>
-            <integer>15</integer>
+            <integer>5</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>3</integer>
             <key>Hour</key>
-            <integer>16</integer>
+            <integer>6</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>3</integer>
             <key>Hour</key>
-            <integer>17</integer>
+            <integer>7</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>3</integer>
             <key>Hour</key>
-            <integer>18</integer>
+            <integer>8</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>3</integer>
             <key>Hour</key>
-            <integer>19</integer>
+            <integer>9</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>3</integer>
             <key>Hour</key>
-            <integer>20</integer>
+            <integer>10</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>3</integer>
             <key>Hour</key>
-            <integer>21</integer>
+            <integer>11</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>3</integer>
             <key>Hour</key>
-            <integer>22</integer>
+            <integer>12</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key>
+            <integer>3</integer>
+            <key>Hour</key>
+            <integer>13</integer>
+            <key>Minute</key>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>4</integer>
             <key>Hour</key>
-            <integer>15</integer>
+            <integer>5</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>4</integer>
             <key>Hour</key>
-            <integer>16</integer>
+            <integer>6</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>4</integer>
             <key>Hour</key>
-            <integer>17</integer>
+            <integer>7</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>4</integer>
             <key>Hour</key>
-            <integer>18</integer>
+            <integer>8</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>4</integer>
             <key>Hour</key>
-            <integer>19</integer>
+            <integer>9</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>4</integer>
             <key>Hour</key>
-            <integer>20</integer>
+            <integer>10</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>4</integer>
             <key>Hour</key>
-            <integer>21</integer>
+            <integer>11</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>4</integer>
             <key>Hour</key>
-            <integer>22</integer>
+            <integer>12</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key>
+            <integer>4</integer>
+            <key>Hour</key>
+            <integer>13</integer>
+            <key>Minute</key>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>5</integer>
             <key>Hour</key>
-            <integer>15</integer>
+            <integer>5</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>5</integer>
             <key>Hour</key>
-            <integer>16</integer>
+            <integer>6</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>5</integer>
             <key>Hour</key>
-            <integer>17</integer>
+            <integer>7</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>5</integer>
             <key>Hour</key>
-            <integer>18</integer>
+            <integer>8</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>5</integer>
             <key>Hour</key>
-            <integer>19</integer>
+            <integer>9</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>5</integer>
             <key>Hour</key>
-            <integer>20</integer>
+            <integer>10</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>5</integer>
             <key>Hour</key>
-            <integer>21</integer>
+            <integer>11</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
         </dict>
         <dict>
             <key>Weekday</key>
             <integer>5</integer>
             <key>Hour</key>
-            <integer>22</integer>
+            <integer>12</integer>
             <key>Minute</key>
-            <integer>0</integer>
+            <integer>50</integer>
+        </dict>
+        <dict>
+            <key>Weekday</key>
+            <integer>5</integer>
+            <key>Hour</key>
+            <integer>13</integer>
+            <key>Minute</key>
+            <integer>50</integer>
         </dict>
     </array>
     <key>RunAtLoad</key>
     <false/>
     <key>StandardOutPath</key>
-    <string>/tmp/com.ken.timekeepy.timeout-notify.log</string>
+    <string>/tmp/com.ken.timekeepy.timein-notify.log</string>
     <key>StandardErrorPath</key>
-    <string>/tmp/com.ken.timekeepy.timeout-notify.log</string>
+    <string>/tmp/com.ken.timekeepy.timein-notify.log</string>
 </dict>
 </plist>

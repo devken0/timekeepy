@@ -16,35 +16,37 @@ This is a simple timekeeping tool that I use at work. It uses python libraries l
 - `MAX_SCREENSHOTS` (default `60`) — cap on screenshots kept in `SCREENSHOTS_DIR`.
 - `SELENIUM_TIMEOUT_SECONDS` (default `9999`) — how long Selenium waits for elements (kept high because you take the selfie manually between steps).
 
-### Scheduled reminder
+### Scheduled reminders
 
-A LaunchAgent can prompt you Mon–Fri at the end of your shift with *"Have you already timed out for today?"* and three buttons: **Ignore**, **Remind in 10 min**, and **Time out now** (which launches `run.command`). The 10-minute snooze is short on purpose — overtime is unpaid, so a single snooze keeps you well under typical timesheet rounding.
+Two LaunchAgents nudge you Mon–Fri so you don't forget to clock in or out. Both derive their fire time from `WORK_START_HOUR` in `.env` — edit that value and the next day's reminders shift automatically (no reinstall).
 
-The reminder time is derived from `WORK_START_HOUR` in `.env`: it fires at `WORK_START_HOUR + 9` (8h shift + 1h lunch). With the default `WORK_START_HOUR=10` the prompt appears at 19:00. Change `WORK_START_HOUR` in `.env` and the next day's reminder moves automatically — no reinstall needed (the LaunchAgent fires hourly within a wide evening window and the wrapper re-reads `.env` each time).
+**Time-in reminder** — fires 10 minutes before shift start (e.g. 09:50 for `WORK_START_HOUR=10`). Dialog: *"Time to time in for your shift?"* with **Ignore** and **Time in now**. No snooze: snoozing would just make you late.
 
-Install:
+**Time-out reminder** — fires at `WORK_START_HOUR + 9` (8h shift + 1h lunch; e.g. 19:00 for `WORK_START_HOUR=10`). Dialog: *"Have you already timed out for today?"* with **Ignore**, **Remind in 10 min**, and **Time out now**. The 10-minute snooze is short on purpose — overtime is unpaid, so a single snooze keeps you well under typical timesheet rounding.
+
+Both *Time in now* / *Time out now* buttons launch `run.command`; `main.py` picks the right action based on current time.
+
+Install both:
 
 ```sh
 ./install-schedule.sh
 ```
 
-Smoke-test the dialog without waiting (bypasses the hour check):
+Smoke-test the dialogs without waiting (bypasses the hour check):
 
 ```sh
+./notify-timein.sh force
 ./notify-timeout.sh force
 ```
 
 Disable temporarily (e.g. PTO):
 
 ```sh
+launchctl bootout gui/$UID ~/Library/LaunchAgents/com.ken.timekeepy.timein-notify.plist
 launchctl bootout gui/$UID ~/Library/LaunchAgents/com.ken.timekeepy.timeout-notify.plist
 ```
 
-Re-enable:
+Re-enable: rerun `./install-schedule.sh`.
 
-```sh
-launchctl bootstrap gui/$UID ~/Library/LaunchAgents/com.ken.timekeepy.timeout-notify.plist
-```
-
-Logs: `/tmp/timekeepy-timeout-notify.log`.
+Logs: `/tmp/com.ken.timekeepy.timein-notify.log`, `/tmp/com.ken.timekeepy.timeout-notify.log`.
 
