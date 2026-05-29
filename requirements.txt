@@ -1,4 +1,4 @@
-selenium
+selenium==4.36.0
 #watchdog
 #pyautogui
-python-dotenv
+python-dotenv==1.2.1

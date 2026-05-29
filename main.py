@@ -132,9 +132,13 @@ def preview_screenshot(screenshot_path, seconds):
 
 def main():
     config = load_config()
+    os.makedirs(config["screenshots_dir"], exist_ok=True)
+
+    # Anything older than this predates the current session (no new selfie taken).
+    session_start = delay.time()
 
     try:
-        subprocess.run(["open", "-a", config["webcam_app"], "-W"])
+        result = subprocess.run(["open", "-a", config["webcam_app"], "-W"])
     except FileNotFoundError:
         log.error("The 'open' command or webcam app was not found.")
         sys.exit(1)
@@ -142,11 +146,26 @@ def main():
         log.error("Error opening the webcam app: %s", e)
         sys.exit(1)
 
+    if result.returncode != 0:
+        log.error(
+            "Webcam app '%s' failed to open (exit %d).",
+            config["webcam_app"],
+            result.returncode,
+        )
+        sys.exit(1)
+
     log.info("Application closed. Continuing script execution.")
 
     most_recent_file = find_most_recent_jpg(config["selfie_dir"])
     if most_recent_file is None:
         log.error("No selfie image found in %s", config["selfie_dir"])
+        sys.exit(1)
+
+    if os.path.getmtime(most_recent_file) < session_start:
+        log.error(
+            "Most recent selfie %s predates this session — no new photo taken?",
+            most_recent_file,
+        )
         sys.exit(1)
 
     timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -159,61 +178,62 @@ def main():
         log.error("Error moving selfie file: %s", e)
         sys.exit(1)
 
-    driver = webdriver.Safari()
     try:
-        driver.get(config["login_url"])
+        driver = webdriver.Safari()
+        try:
+            driver.get(config["login_url"])
 
-        first_name = driver.find_element(By.ID, "firstName")
-        first_name.clear()
-        first_name.send_keys(config["first_name"])
+            first_name = driver.find_element(By.ID, "firstName")
+            first_name.clear()
+            first_name.send_keys(config["first_name"])
 
-        last_name = driver.find_element(By.ID, "lastName")
-        last_name.clear()
-        last_name.send_keys(config["last_name"])
+            last_name = driver.find_element(By.ID, "lastName")
+            last_name.clear()
+            last_name.send_keys(config["last_name"])
 
-        pin = driver.find_element(By.ID, "pin")
-        pin.clear()
-        pin.send_keys(config["pin"])
+            pin = driver.find_element(By.ID, "pin")
+            pin.clear()
+            pin.send_keys(config["pin"])
 
-        login_button = driver.find_element(By.CSS_SELECTOR, ".btn-login")
-        login_button.click()
+            login_button = driver.find_element(By.CSS_SELECTOR, ".btn-login")
+            login_button.click()
 
-        wait = WebDriverWait(driver, config["selenium_timeout_seconds"])
+            wait = WebDriverWait(driver, config["selenium_timeout_seconds"])
 
-        dropdown_element = wait.until(EC.element_to_be_clickable((By.ID, "timeType")))
-        select = Select(dropdown_element)
+            dropdown_element = wait.until(EC.element_to_be_clickable((By.ID, "timeType")))
+            select = Select(dropdown_element)
 
-        current_time = datetime.now().time()
-        work_start = time(config["work_start_hour"], 0, 0)
-        if current_time <= work_start:
-            select.select_by_visible_text("Time In")
-        else:
-            select.select_by_visible_text("Time Out")
+            current_time = datetime.now().time()
+            work_start = time(config["work_start_hour"], 0, 0)
+            if current_time <= work_start:
+                select.select_by_visible_text("Time In")
+            else:
+                select.select_by_visible_text("Time Out")
 
-        file_upload = driver.find_element(By.ID, "selfieFile")
-        file_upload.send_keys(temp)
+            file_upload = driver.find_element(By.ID, "selfieFile")
+            file_upload.send_keys(temp)
 
-        submit = wait.until(EC.element_to_be_clickable((By.ID, "submitButton")))
-        submit.click()
+            submit = wait.until(EC.element_to_be_clickable((By.ID, "submitButton")))
+            submit.click()
 
-        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".btn-back")))
+            wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".btn-back")))
 
-        activate_safari()
-        delay.sleep(2)
+            activate_safari()
+            delay.sleep(2)
 
-        screenshot_path = os.path.join(config["screenshots_dir"], f"{timestamp}.png")
-        driver.save_screenshot(screenshot_path)
-        log.info("Saved screenshot: %s", screenshot_path)
+            screenshot_path = os.path.join(config["screenshots_dir"], f"{timestamp}.png")
+            driver.save_screenshot(screenshot_path)
+            log.info("Saved screenshot: %s", screenshot_path)
 
-        preview_screenshot(screenshot_path, config["screenshot_preview_seconds"])
+            preview_screenshot(screenshot_path, config["screenshot_preview_seconds"])
+        finally:
+            driver.quit()
     finally:
-        driver.quit()
-
-    try:
-        os.remove(temp)
-        log.info("Removed selfie temp file: %s", temp)
-    except OSError as e:
-        log.error("Error removing temp file %s: %s", temp, e)
+        try:
+            os.remove(temp)
+            log.info("Removed selfie temp file: %s", temp)
+        except OSError as e:
+            log.error("Error removing temp file %s: %s", temp, e)
 
     limit_files_in_directory(config["screenshots_dir"], config["max_screenshots"])
 

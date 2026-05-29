@@ -1,7 +1,7 @@
 #!/bin/sh
 set -e
 
-REPO_DIR="/Users/ken/Code/timekeepy"
+REPO_DIR=$(cd "$(dirname "$0")" && pwd)
 ENV_FILE="$REPO_DIR/.env"
 APPLESCRIPT="$REPO_DIR/notify-timein.applescript"
 
@@ -31,4 +31,4 @@ if [ "$1" != "force" ] && [ "$CURRENT_HOUR" -ne "$TARGET_HOUR" ]; then
     exit 0
 fi
 
-exec /usr/bin/osascript "$APPLESCRIPT"
+exec /usr/bin/osascript "$APPLESCRIPT" "$REPO_DIR"

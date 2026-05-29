@@ -5,4 +5,6 @@
 MINUTES="${1:-10}"
 SECONDS_DELAY=$((MINUTES * 60))
 
-nohup sh -c "sleep $SECONDS_DELAY; /Users/ken/Code/timekeepy/notify-timeout.sh force" </dev/null >/dev/null 2>&1 &
+REPO_DIR=$(cd "$(dirname "$0")" && pwd)
+
+nohup sh -c "sleep $SECONDS_DELAY; \"$REPO_DIR/notify-timeout.sh\" force" </dev/null >/dev/null 2>&1 &

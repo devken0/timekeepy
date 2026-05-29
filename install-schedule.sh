@@ -3,6 +3,7 @@
 set -e
 
 cd "$(dirname "$0")"
+REPO_DIR=$(pwd)
 
 # install_agent <label> <wrapper_path> <minute> <hour1 hour2 ...>
 install_agent() {
@@ -68,7 +69,7 @@ PLIST
 # unless current hour == WORK_START_HOUR + 9.
 install_agent \
     "com.ken.timekeepy.timeout-notify" \
-    "/Users/ken/Code/timekeepy/notify-timeout.sh" \
+    "$REPO_DIR/notify-timeout.sh" \
     0 \
     15 16 17 18 19 20 21 22
 
@@ -77,7 +78,7 @@ install_agent \
 # :50 of the hour before WORK_START_HOUR, i.e. 10 minutes before shift).
 install_agent \
     "com.ken.timekeepy.timein-notify" \
-    "/Users/ken/Code/timekeepy/notify-timein.sh" \
+    "$REPO_DIR/notify-timein.sh" \
     50 \
     5 6 7 8 9 10 11 12 13
 
