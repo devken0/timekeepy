@@ -48,6 +48,7 @@ def load_config():
         "work_start_hour": int(os.getenv("WORK_START_HOUR", "10")),
         "max_screenshots": int(os.getenv("MAX_SCREENSHOTS", "60")),
         "selenium_timeout_seconds": int(os.getenv("SELENIUM_TIMEOUT_SECONDS", "9999")),
+        "screenshot_preview_seconds": int(os.getenv("SCREENSHOT_PREVIEW_SECONDS", "8")),
     }
 
 
@@ -106,6 +107,27 @@ def activate_safari():
         )
     except (subprocess.CalledProcessError, subprocess.TimeoutExpired, FileNotFoundError) as e:
         log.warning("Could not activate Safari before screenshot: %s", e)
+
+
+def preview_screenshot(screenshot_path, seconds):
+    # show the saved screenshot in Quick Look, then auto-dismiss so the run stays hands-off
+    if seconds <= 0:
+        return
+    try:
+        proc = subprocess.Popen(
+            ["qlmanage", "-p", screenshot_path],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL,
+        )
+    except OSError as e:
+        log.warning("Could not open Quick Look preview: %s", e)
+        return
+    delay.sleep(seconds)
+    proc.terminate()
+    try:
+        proc.wait(timeout=5)
+    except subprocess.TimeoutExpired:
+        proc.kill()
 
 
 def main():
@@ -183,7 +205,7 @@ def main():
         driver.save_screenshot(screenshot_path)
         log.info("Saved screenshot: %s", screenshot_path)
 
-        delay.sleep(10)
+        preview_screenshot(screenshot_path, config["screenshot_preview_seconds"])
     finally:
         driver.quit()
 

@@ -15,13 +15,13 @@ No test suite, no linter, no CI. Manual smoke-tests only.
 
 ## Configuration
 
-All config comes from `.env` (loaded by `python-dotenv` in [main.py:16](main.py#L16)). `.env.example` is the source of truth for variable names. Required: `WEBCAM_APP`, `SELFIE_DIR`, `LOGIN_URL`, `FIRST_NAME`, `LAST_NAME`, `PIN`, `SCREENSHOTS_DIR`. Optional: `WORK_START_HOUR` (default `10`), `MAX_SCREENSHOTS` (default `60`), `SELENIUM_TIMEOUT_SECONDS` (default `9999`).
+All config comes from `.env` (loaded by `python-dotenv` in [main.py:16](main.py#L16)). `.env.example` is the source of truth for variable names. Required: `WEBCAM_APP`, `SELFIE_DIR`, `LOGIN_URL`, `FIRST_NAME`, `LAST_NAME`, `PIN`, `SCREENSHOTS_DIR`. Optional: `WORK_START_HOUR` (default `10`), `MAX_SCREENSHOTS` (default `60`), `SELENIUM_TIMEOUT_SECONDS` (default `9999`), `SCREENSHOT_PREVIEW_SECONDS` (default `8`; `0` disables the post-run Quick Look preview).
 
 `WORK_START_HOUR` is the pivot for everything time-related — `main.py` uses it to choose Time In vs Time Out ([main.py:164-169](main.py#L164-L169)), and the notify wrappers read it at fire time to gate their dialogs. Change `WORK_START_HOUR` and the next day's reminders shift automatically without reinstalling the LaunchAgents.
 
 ## Architecture
 
-**`main.py`** is a single linear `main()` function — opens the webcam app and waits for it to quit, grabs the most recent `.jpg` from `SELFIE_DIR`, moves it to `/tmp/<timestamp>.jpg`, then drives Safari through login → action dropdown → file upload → submit → screenshot. Action is picked by clock time vs `WORK_START_HOUR` (≤ start → Time In, else Time Out). Finishes by deleting the temp selfie and pruning `SCREENSHOTS_DIR` to `MAX_SCREENSHOTS`.
+**`main.py`** is a single linear `main()` function — opens the webcam app and waits for it to quit, grabs the most recent `.jpg` from `SELFIE_DIR`, moves it to `/tmp/<timestamp>.jpg`, then drives Safari through login → action dropdown → file upload → submit → screenshot. Action is picked by clock time vs `WORK_START_HOUR` (≤ start → Time In, else Time Out). After saving the screenshot it pops the image in Quick Look (`qlmanage -p`) for `SCREENSHOT_PREVIEW_SECONDS` as a non-blank confirmation, auto-dismissing by terminating that process — this replaced an old fixed `sleep(10)`. Finishes by deleting the temp selfie and pruning `SCREENSHOTS_DIR` to `MAX_SCREENSHOTS`.
 
 **Reminder chain** (each step is its own file, all under repo root):
 
